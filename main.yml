@@ -1,0 +1,50 @@
+---
+- name: Run tasks on Linux
+  hosts: linux
+  become: yes
+  tasks:
+    - name: Install Apache on Linux
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    - name: Start Apache Service on Linux
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Create an index.html file on Linux
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: "<h1>AWX Ansible Automation Demo on Linux</h1>"
+
+    - name: Open port 80 on Linux firewall
+      ansible.builtin.firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled
+
+    - name: Reload Linux firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+
+- name: Run tasks on Windows
+  hosts: windows
+  tasks:
+    - name: Install IIS (Windows Web Server)
+      win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Create an index.html file on Windows
+      win_copy:
+        content: "<h1>AWX Ansible Automation Demo on Windows</h1>"
+        dest: C:\inetpub\wwwroot\index.html
+
+    - name: Ensure IIS is started and running on Windows
+      win_service:
+        name: W3SVC
+        start_mode: auto
+        state: started
